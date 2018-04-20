@@ -4,8 +4,6 @@
 #include <maya/MSelectionList.h>
 #include <maya/MDagPath.h>
 #include <maya/MFnTransform.h>
-#include <maya/MQuaternion.h>
-#include <maya/MVector.h>
 #include <maya/MString.h>
 #include <maya/MGlobal.h>
 
@@ -30,12 +28,12 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 			MStatusException::throwIf(MStatus::kInvalidParameter, "usage: AdhereObject [x] [y] [z] [object/world] [maxdistance]", "AdhereObject");
 		}
 
-		MVector ray_vector;
+		MVector ray_vector_master;
 		MString space;
 		double max_distance;
-		args.get(0, ray_vector.x);
-		args.get(1, ray_vector.y);
-		args.get(2, ray_vector.z);
+		args.get(0, ray_vector_master.x);
+		args.get(1, ray_vector_master.y);
+		args.get(2, ray_vector_master.z);
 		args.get(3, space);
 		args.get(4, max_distance);
 		if (space != "object" && space != "world") {
@@ -63,6 +61,7 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 		MIntArray vertexes;
 		int triangle_num;
 		VectorF normal;
+		this->histories_.clear();
 		for (unsigned int i = 0; i < select.length() - 1; ++i) {
 			//接着先のフェースイテレータ
 			MItMeshPolygon face_iter(ground, MObject::kNullObj, &ret);
@@ -78,14 +77,15 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 			transform.getRotation(rot);
 
 			//ベクトルの回転
+			MVector ray_vector = ray_vector_master;
 			if (space == "object") {
 				MQuaternion ray_quat(ray_vector.x, ray_vector.y, ray_vector.z, 0);
-				ray_quat = rot.conjugateIt() * ray_quat * rot;
+				ray_quat = (rot.conjugate() * ray_quat) * rot;
 				ray_vector.x = ray_quat.x;
 				ray_vector.y = ray_quat.y;
 				ray_vector.z = ray_quat.z;
 			}
-
+			std::cerr << "====================" << std::endl;
 			std::cerr << "POINT:" << point.toString() << std::endl;
 			std::cerr << "RAY:" << ray_vector.x << "," << ray_vector.y << "," << ray_vector.z << std::endl;
 
@@ -97,23 +97,17 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 
 				for (int idx = 0; idx < triangle_num; idx++) {
 					//三角面を取得
-					face_iter.getTriangle(idx, points, vertexes);
+					face_iter.getTriangle(idx, points, vertexes, MSpace::kWorld);
 					MStatusException::throwIf(ret, "三角フェースデータの取得に失敗", "AdhereObjectCmd");
 
 					//チェック関数
-					double length_tmp = _checkHitPolygon(ground_transform.getTranslation(MSpace::kWorld), points, point, ray_vector, is_cross_current, normal, max_distance);
+					double length_tmp = _checkHitPolygon(/*ground_transform.getTranslation(MSpace::kWorld)*/ MVector(), points, point, ray_vector, is_cross_current, normal, max_distance);
 
 					if (is_cross_current) {
 
-						//pointからray_vector方向へmax_distance動かし、normalの方向へ回転する
-						VectorF hitpoint = point + ray_vector.normal() * length_tmp;
-
 						MVector world_up = MGlobal::upAxis();
 						MQuaternion rotation(world_up, normal);
-
-						transform.setRotatePivot(hitpoint, MSpace::kWorld, true);
-						transform.setRotation(rotation, MSpace::kWorld);
-
+						this->histories_.emplace_back(std::move(dag), ray_vector.normal() * length_tmp, rot, rotation);
 						break;
 					}
 				}
@@ -131,18 +125,19 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 
 MStatus wlib::AdhereObjectCmd::undoIt(void)
 {
+	for (auto p = this->histories_.begin(); p != this->histories_.end(); ++p) p->undoIt();
 	return MStatus();
 }
 
 MStatus wlib::AdhereObjectCmd::redoIt(void)
 {
-
+	for (auto p = this->histories_.begin(); p != this->histories_.end(); ++p) p->doIt();
 	return MStatus();
 }
 
 bool wlib::AdhereObjectCmd::isUndoable(void) const
 {
-	return false;
+	return true;
 }
 
 double wlib::AdhereObjectCmd::_checkHitPolygon(const MVector & abs_position, const MPointArray & _points, const VectorF & ray_point, const VectorF & ray_vector, bool & is_cross, VectorF & normal, const double max_distance)
@@ -193,5 +188,38 @@ double wlib::AdhereObjectCmd::_checkHitPolygon(const MVector & abs_position, con
 		}
 	}
 
+	return ret;
+}
+
+wlib::AdhereObjectCmd::_History::_History(MDagPath && _dag, const MVector & _move, const MQuaternion & _before_rotate, const MQuaternion & _after_rotate)
+	: dag(std::move(_dag)), move(_move), before_rotate(_before_rotate), after_rotate(_after_rotate)
+{
+}
+
+MStatus wlib::AdhereObjectCmd::_History::doIt() const
+{
+	MStatus ret;
+	MFnTransform transform(this->dag, &ret);
+	if (ret != MStatus::kSuccess) {
+		AdhereObjectCmd::displayError("トランスフォームノードの取得に失敗しました");
+		return ret;
+	}
+	transform.translateBy(this->move, MSpace::kWorld);
+	//transform.setTranslation(hitpoint, MSpace::kWorld);
+	transform.setRotation(this->after_rotate, MSpace::kWorld);
+	return ret;
+}
+
+MStatus wlib::AdhereObjectCmd::_History::undoIt() const
+{
+	MStatus ret;
+	MFnTransform transform(this->dag, &ret);
+	if (ret != MStatus::kSuccess) {
+		AdhereObjectCmd::displayError("トランスフォームノードの取得に失敗しました");
+		return ret;
+	}
+	transform.translateBy(-this->move, MSpace::kWorld);
+	//transform.setTranslation(hitpoint, MSpace::kWorld);
+	transform.setRotation(this->before_rotate, MSpace::kWorld);
 	return ret;
 }

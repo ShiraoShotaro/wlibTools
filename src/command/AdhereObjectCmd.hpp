@@ -2,11 +2,14 @@
 #ifndef WLIB_ADHEREOBJECTCMD_HPP_
 #define WLIB_ADHEREOBJECTCMD_HPP_
 
-#include <memory>
+
+#include <vector>
 #include <maya/MPxCommand.h>
-#include <maya/MFnTransform.h>
+#include <maya/MVector.h>
+#include <maya/MQuaternion.h>
 #include <maya/MPointArray.h>
 #include <maya/MStatus.h>
+#include <maya/MDagPath.h>
 #include "Vector.hpp"
 
 namespace wlib {
@@ -27,8 +30,19 @@ public:
 
 private:
 
-	std::unique_ptr<MFnTransform> before_;
-	std::unique_ptr<MFnTransform> after_;
+	struct _History {
+		MDagPath dag;
+		MVector move;
+		MQuaternion after_rotate;
+		MQuaternion before_rotate;
+	
+		_History(MDagPath && _dag, const MVector & _move, const MQuaternion & _before_rotate, const MQuaternion & _after_rotate);
+
+		MStatus doIt() const;
+		MStatus undoIt() const;
+	};
+
+	std::vector<_History> histories_;
 
 	/**
 	* 三角面とベクトルの交点までの距離を求める
