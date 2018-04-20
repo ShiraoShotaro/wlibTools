@@ -17,6 +17,8 @@ public:
 	AdhereObjectCmd() = default;
 	virtual ~AdhereObjectCmd() = default;
 
+	static void * creator();
+
 	virtual MStatus doIt(const MArgList & args) override;
 	virtual MStatus undoIt(void) override;
 	virtual MStatus redoIt(void) override;
@@ -38,8 +40,11 @@ private:
 	* @return ãóó£
 	* @throws MStatusException åvéZè„ÉGÉâÅ[Ç™î≠ê∂ÇµÇΩèÍçá
 	*/
-	static double _checkHitPolygon(const MPointArray & points, const VectorF & ray_point, const VectorF & ray_vector, bool & is_cross, VectorF & normal, const double max_distance = 100000.0);
+	static double _checkHitPolygon(const MVector & abs_position, const MPointArray & points, const VectorF & ray_point, const VectorF & ray_vector, bool & is_cross, VectorF & normal, const double max_distance = 100000.0);
 
 
 };
+
+}
+
 #endif

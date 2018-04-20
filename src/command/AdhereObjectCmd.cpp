@@ -17,6 +17,11 @@
 
 #include "exception/MStatusException.hpp"
 
+void * wlib::AdhereObjectCmd::creator()
+{
+	return new AdhereObjectCmd;
+}
+
 //[x] [y] [z] [object/world]
 MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 {
@@ -48,6 +53,7 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 		MStatus ret;
 		MDagPath ground;
 		select.getDagPath(select.length() - 1, ground);
+		MFnTransform ground_transform(ground);
 
 		//MFnMesh ground_mesh(ground, &ret);
 		//MStatusException::throwIfError(ret, "ポリゴンフェースの取得に失敗", "wlib::FollowGround::_getLengthToCrossPoint");
@@ -67,11 +73,7 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 			MFnTransform transform(dag);
 
 			//絶対座標
-			VectorF point;
-			MVector vec = transform.getTranslation(MSpace::kWorld);
-			point.x = vec.x;
-			point.y = vec.y;
-			point.z = vec.z;
+			VectorF point = transform.getTranslation(MSpace::kPreTransform);
 			MQuaternion rot;
 			transform.getRotation(rot);
 
@@ -84,27 +86,33 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 				ray_vector.z = ray_quat.z;
 			}
 
-			for (; !face_iter.isDone(); face_iter.next()) {
+			std::cerr << "POINT:" << point.toString() << std::endl;
+			std::cerr << "RAY:" << ray_vector.x << "," << ray_vector.y << "," << ray_vector.z << std::endl;
+
+			bool is_cross_current = false;
+			for (; !face_iter.isDone() && !is_cross_current; face_iter.next()) {
 				//三角面の数を取得 
 				ret = face_iter.numTriangles(triangle_num);
 				MStatusException::throwIf(ret, "三角面数の取得に失敗", "AdhereObjectCmd");
 
-				bool is_cross_current;
 				for (int idx = 0; idx < triangle_num; idx++) {
 					//三角面を取得
 					face_iter.getTriangle(idx, points, vertexes);
 					MStatusException::throwIf(ret, "三角フェースデータの取得に失敗", "AdhereObjectCmd");
 
 					//チェック関数
-					double length_tmp = _checkHitPolygon(points, point, ray_vector, is_cross_current, normal, max_distance);
+					double length_tmp = _checkHitPolygon(ground_transform.getTranslation(MSpace::kWorld), points, point, ray_vector, is_cross_current, normal, max_distance);
 
 					if (is_cross_current) {
 
 						//pointからray_vector方向へmax_distance動かし、normalの方向へ回転する
-						VectorF hitpoint = point + ray_vector.normal() * max_distance;
+						VectorF hitpoint = point + ray_vector.normal() * length_tmp;
 
+						MVector world_up = MGlobal::upAxis();
+						MQuaternion rotation(world_up, normal);
 
-
+						transform.setTranslation(hitpoint, MSpace::kObject);
+						transform.setRotation(rotation, MSpace::kWorld);
 
 						break;
 					}
@@ -112,48 +120,6 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 			}
 
 		}
-
-		MString ac_obj, pa_obj;
-		args.get(0, ac_obj);
-		args.get(1, pa_obj);
-
-		//座標取得
-		MDoubleArray abs_pos_array;
-		MGlobal::executeCommand("xform -q -ws -rp " + ac_obj, abs_pos_array);
-		double px = abs_pos_array[0];
-		double py = abs_pos_array[1];
-		double pz = abs_pos_array[2];
-
-
-
-
-		MPointArray points;
-		MIntArray vertexes;
-		int triangle_num;
-		bool is_cross_current;
-		double length = max_distance;
-
-		for (; !face_iter.isDone(); face_iter.next()) {
-			//三角面の数を取得 
-			ret = face_iter.numTriangles(triangle_num);
-			MStatusException::throwIfError(ret, "三角面数の取得に失敗", "wlib::FollowGround::_getLengthToCrossPoint");
-
-			for (int idx = 0; idx < triangle_num; idx++) {
-				//三角面を取得
-				face_iter.getTriangle(idx, points, vertexes);
-				MStatusException::throwIfError(ret, "三角フェースデータの取得に失敗", "wlib::FollowGround::_getLengthToCrossPoint");
-
-				//チェック関数
-				double length_tmp = _checkHitPolygon(points, ray_point, ray_vector, &is_cross_current, max_distance);
-
-				if (is_cross_current) {
-					std::cout << "CROSS!! distance => " << length << std::endl;
-					if (length_tmp < length) length = length_tmp;
-					*is_cross = true;
-				}
-			}
-		}
-
 	}
 	catch (MStatusException e) {
 		this->displayError(e.toString());
@@ -179,13 +145,22 @@ bool wlib::AdhereObjectCmd::isUndoable(void) const
 	return false;
 }
 
-double wlib::AdhereObjectCmd::_checkHitPolygon(const MPointArray & points, const VectorF & ray_point, const VectorF & ray_vector, bool & is_cross, VectorF & normal, const double max_distance)
+double wlib::AdhereObjectCmd::_checkHitPolygon(const MVector & abs_position, const MPointArray & _points, const VectorF & ray_point, const VectorF & ray_vector, bool & is_cross, VectorF & normal, const double max_distance)
 {
 	//頂点数が3固定
-	if (points.length() != 3) throw MStatusException(MStatus::kInvalidParameter, "三角面になっていない", "AdhereObject");
+	if (_points.length() != 3) throw MStatusException(MStatus::kInvalidParameter, "三角面になっていない", "AdhereObject");
 
 	double ret = max_distance;
 	is_cross = false;
+
+	MPointArray points;
+	points.append(_points[0] + abs_position);
+	points.append(_points[1] + abs_position);
+	points.append(_points[2] + abs_position);
+
+	std::cerr << "TRIANGLE[0]:" << points[0].x << "," << points[0].y << "," << points[0].z << std::endl;
+	std::cerr << "TRIANGLE[1]:" << points[1].x << "," << points[1].y << "," << points[1].z << std::endl;
+	std::cerr << "TRIANGLE[2]:" << points[2].x << "," << points[2].y << "," << points[2].z << std::endl;
 
 	VectorD edge1(points[1] - points[0]);
 	VectorD edge2(points[2] - points[0]);

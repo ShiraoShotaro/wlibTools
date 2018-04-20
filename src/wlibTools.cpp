@@ -8,7 +8,7 @@
 #include <maya/MDrawRegistry.h>
 
 //*** INCLUDE HEADERS ***
-#include "node/FollowGround.hpp"
+#include "command/AdhereObjectCmd.hpp"
 //***********************
 
 namespace {
@@ -40,7 +40,7 @@ std::vector<CommandPair> getCommands(void) {
 	//コマンドをここに追加
 	//CommandPair("コマンド名", [クリエイター関数のポインタ]),
 	return std::vector<CommandPair> {
-//		CommandPair("wlibSetKeyframes", wlib::SetKeyframesCommand::creator),
+		CommandPair("wlibAdhereObject", wlib::AdhereObjectCmd::creator),
 //		CommandPair("wlib_sortVertexID", wlib::SortVertexID::creator),
 		//CommandPair("Hogehoge", wlib::Hogehoge::creator),
 	};
@@ -51,7 +51,7 @@ std::vector<NodePair> getNodes(void) {
 	//ノードをここに追加
 	//NodePair("ノード名", [Node ID], [クリエイター関数のポインタ], [initialize関数のポインタ]),
 	return std::vector<NodePair> {
-		NodePair("wlibAdhereObject", 0x73000, wlib::CarJibCraneNode::creator, wlib::CarJibCraneNode::initialize),
+//		NodePair("wlibAdhereObject", 0x73000, wlib::CarJibCraneNode::creator, wlib::CarJibCraneNode::initialize),
 	};
 }
 
@@ -121,7 +121,7 @@ MStatus wlib::initializePlugin(MObject _obj) {
 	try {
 		addCommands(plugin);
 		addNodes(plugin);
-
+		/*
 		//Translator
 		MStatusException::throwIf(plugin.registerFileTranslator("exaTranslator", "", &ExaTranslator::creator, "", "", true), "exaExportの追加に失敗");
 
@@ -132,7 +132,7 @@ MStatus wlib::initializePlugin(MObject _obj) {
 		//CameraRigNode関係
 		MStatusException::throwIf(plugin.registerNode("wlibCameraRig", 0x72001, &CameraRigNode::creator, &CameraRigNode::initialize, MPxNode::kLocatorNode, &CameraRigNode::drawDbClassification), "CameraRigNodeの登録に失敗");
 		MStatusException::throwIf(MHWRender::MDrawRegistry::registerDrawOverrideCreator(CameraRigNode::drawDbClassification, CameraRigNode::drawRegistrantId, CameraRigNodeDrawOverride::Creator), "CameraRigNodeDrawOverrideの登録に失敗");
-
+		*/
 	}
 	catch (MStatusException e) {
 		std::cerr << e.toString("wlib::initializePlugin") << std::endl;
@@ -172,7 +172,7 @@ MStatus wlib::uninitializePlugin(MObject _obj) {
 	try {
 		removeCommands(plugin);
 		removeNodes(plugin);
-
+		/*
 		MStatusException::throwIf(plugin.deregisterFileTranslator("exaTranslator"), "exaExportの解除に失敗");
 
 		MStatusException::throwIf(MHWRender::MDrawRegistry::deregisterGeometryOverrideCreator(CameraHelperHUD::drawDbClassification, CameraHelperHUD::drawRegistrantId), "CameraHUDDrawOverrideの解除に失敗しました");
@@ -180,6 +180,7 @@ MStatus wlib::uninitializePlugin(MObject _obj) {
 
 		MStatusException::throwIf(MHWRender::MDrawRegistry::deregisterGeometryOverrideCreator(CameraRigNode::drawDbClassification, CameraRigNode::drawRegistrantId), "CameraRigNodeDrawOverrideの解除に失敗しました");
 		MStatusException::throwIf(plugin.deregisterNode(0x72001), "CameraRigNodeの解除に失敗");
+		*/
 	}
 	catch (MStatusException e) {
 		std::cerr << e.toString("wlib::uninitializePlugin") << std::endl;

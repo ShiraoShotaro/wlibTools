@@ -104,12 +104,14 @@ public:
 	* ベクトルの外積
 	* @return 乗算後のベクトル
 	*/
-	Vector<T> operator*(const T & vec) const;
+	Vector<T> operator*(const Vector<T> & vec) const;
 
 	/** 表示用文字列に変換
 	 * @return 文字列
 	 */
 	std::string toString(void) const;
+
+	operator MVector() const;
 
 	/**
 	 * 外積を求める
@@ -210,7 +212,7 @@ inline Vector<T> Vector<T>::operator-(const Vector<T>& v) const {
 }
 
 template<typename T>
-inline Vector<T> Vector<T>::operator*(const T & vec) const
+inline Vector<T> Vector<T>::operator*(const Vector<T> & vec) const
 {
 	return Vector<T>((this->y * vec.z) - (this->z * vec.y), (this->z * vec.x) - (this->x * vec.z), (this->x * vec.y) - (this->y * vec.x));
 }
@@ -221,6 +223,15 @@ inline std::string Vector<T>::toString(void) const {
 		std::to_string(this->x) + ", " +
 		std::to_string(this->y) + ", " +
 		std::to_string(this->z) + ")");
+}
+
+template<typename T>
+inline Vector<T>::operator MVector() const{
+	MVector ret;
+	ret.x = static_cast<double>(this->x);
+	ret.y = static_cast<double>(this->y);
+	ret.z = static_cast<double>(this->z);
+	return ret;
 }
 
 template<typename T>
