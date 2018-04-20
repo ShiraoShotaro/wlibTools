@@ -14,10 +14,10 @@ proc wlibAdhereObjectUtility_doIt(string $vec_grp_, string $chkbox_, string $max
     $wlibAdhObj_space = ((`checkBox -q -value $chkbox_`) == true ? "object" : "world");
     $wlibAdhObj_dis = `floatField -q -v $maxdis_`;
     
-    wlibAdhereObject $wlibAdhObj_x $wlibAdhObj_y $wlibAdhObj_z $wlibAdhObj_space $wlibAdhObj_dis;
+    wlibAdhereObject($wlibAdhObj_x, $wlibAdhObj_y, $wlibAdhObj_z, $wlibAdhObj_space, $wlibAdhObj_dis);
 }
 
-proc wlibAdhereObjectUtilityDialog(){
+global proc wlibAdhereObjectUtilityDialog(){
     global float $wlibAdhObj_x = 0, $wlibAdhObj_y = 1, $wlibAdhObj_z = 0;
     global string $wlibAdhObj_space = "";
     global float $wlibAdhObj_dis = 10000;
@@ -43,13 +43,12 @@ proc wlibAdhereObjectUtilityDialog(){
     showWindow $window;
 }
 
-
 global proc wlibAdhereObjectUtility(string $arg){
     
     global float $wlibAdhObj_x = 0, $wlibAdhObj_y = 1, $wlibAdhObj_z = 0;
     global string $wlibAdhObj_space = "";
     global float $wlibAdhObj_dis = 10000;
   
-    if($wlibAdhObj_space == "" && $arg == "--dialog") wlibAdhereObjectUtilityDialog();
-    else wlibAdhereObject $wlibAdhObj_x $wlibAdhObj_y $wlibAdhObj_z $wlibAdhObj_space $wlibAdhObj_dis;
+    if($wlibAdhObj_space == "" || $arg == "dialog") wlibAdhereObjectUtilityDialog();
+    else wlibAdhereObject($wlibAdhObj_x, $wlibAdhObj_y, $wlibAdhObj_z, $wlibAdhObj_space, $wlibAdhObj_dis);
 }
