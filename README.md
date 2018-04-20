@@ -15,6 +15,8 @@
 
 Maya C++ APIにて開発した、C++によるプラグインコード。
 
+所在:`build/bin/Release/wlibTools`
+
 ### [Command]wlibAdhereObject
 
 例えば、ねじなど、ほかのオブジェクトにピッタリくっつけたいときに使用します。
