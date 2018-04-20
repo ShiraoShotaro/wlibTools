@@ -1,4 +1,4 @@
-#include "wlibCarCameraRig.hpp"
+#include "wlibTools.hpp"
 
 #include <vector>
 #include <string>
@@ -8,30 +8,8 @@
 #include <maya/MDrawRegistry.h>
 
 //*** INCLUDE HEADERS ***
-
-#include "command/SetKeyframesCommand.hpp"
-
-#include "node/CarJibCraneNode.hpp"
-#include "node/CameraRecordNode.hpp"
-#include "node/GamepadNode.hpp"
-#include "node/CameraHelperHUD.hpp"
-#include "node/FocusControllerNode.hpp"
-#include "node/CameraMultiTrackRecorderNode.hpp"
-#include "node/CameraRigNode.hpp"
-#include "node/CameraStabilizerNode.hpp"
-#include "node/CameraGimbalNode.hpp"
-#include "node/MotionMixerNode.hpp"
-#include "node/MotionRecorderNode.hpp"
-#include "node/DroneNode.hpp"
-#include "node/PadToRotateNode.hpp"
-#include "node/RotateNode.hpp"
-#include "node/ScalarRecorderNode.hpp"
-#include "node/AngleRecorderNode.hpp"
-#include "translator/ExaTranslator.hpp"
+#include "node/FollowGround.hpp"
 //***********************
-
-
-
 
 namespace {
 class CommandPair {
@@ -62,7 +40,7 @@ std::vector<CommandPair> getCommands(void) {
 	//コマンドをここに追加
 	//CommandPair("コマンド名", [クリエイター関数のポインタ]),
 	return std::vector<CommandPair> {
-		CommandPair("wlibSetKeyframes", wlib::SetKeyframesCommand::creator),
+//		CommandPair("wlibSetKeyframes", wlib::SetKeyframesCommand::creator),
 //		CommandPair("wlib_sortVertexID", wlib::SortVertexID::creator),
 		//CommandPair("Hogehoge", wlib::Hogehoge::creator),
 	};
@@ -73,20 +51,7 @@ std::vector<NodePair> getNodes(void) {
 	//ノードをここに追加
 	//NodePair("ノード名", [Node ID], [クリエイター関数のポインタ], [initialize関数のポインタ]),
 	return std::vector<NodePair> {
-		NodePair("wlibCarJibCrane", 0x71000, wlib::CarJibCraneNode::creator, wlib::CarJibCraneNode::initialize),
-			NodePair("wlibGamepad", 0x71001, wlib::GamepadNode::creator, wlib::GamepadNode::initialize),
-			NodePair("wlibCameraRecord", 0x71002, wlib::CameraRecordNode::creator, wlib::CameraRecordNode::initialize),
-			NodePair("wlibFocusController", 0x71003, wlib::FocusControllerNode::creator, wlib::FocusControllerNode::initialize),
-			NodePair("wlibCameraMultiTrackRecorder", 0x71004, wlib::CameraMultiTrackRecorderNode::creator, wlib::CameraMultiTrackRecorderNode::initialize),
-			NodePair("wlibCameraStabilizer", 0x71005, wlib::CameraStabilizerNode::creator, wlib::CameraStabilizerNode::initialize),
-			NodePair("wlibCameraGimbal", 0x71006, wlib::CameraGimbalNode::creator, wlib::CameraGimbalNode::initialize),
-			NodePair("wlibMotionMixer", 0x71007, wlib::MotionMixerNode::creator, wlib::MotionMixerNode::initialize),
-			NodePair("wlibMotionRecorder", 0x71008, wlib::MotionRecorderNode::creator, wlib::MotionRecorderNode::initialize),
-			NodePair("wlibDrone", 0x71009, wlib::DroneNode::creator, wlib::DroneNode::initialize),
-			NodePair("wlibPadToRotate", 0x71010, wlib::PadToRotateNode::creator, wlib::PadToRotateNode::initialize),
-			NodePair("wlibRotate", 0x71011, wlib::RotateNode::creator, wlib::RotateNode::initialize),
-			NodePair("wlibScalarRecorder", 0x71012, wlib::ScalarRecorderNode::creator, wlib::ScalarRecorderNode::initialize),
-			NodePair("wlibAngleRecorder", 0x71013, wlib::AngleRecorderNode::creator, wlib::AngleRecorderNode::initialize)
+		NodePair("wlibAdhereObject", 0x73000, wlib::CarJibCraneNode::creator, wlib::CarJibCraneNode::initialize),
 	};
 }
 

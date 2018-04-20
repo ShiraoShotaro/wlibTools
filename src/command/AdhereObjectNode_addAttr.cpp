@@ -1,4 +1,4 @@
-#include "FollowGround.hpp"
+#include "AdhereObjectCmd.hpp"
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MVector.h>
@@ -7,7 +7,7 @@
 ////////////////////////////////////////
 // _addAttr_inMesh
 ////////////////////////////////////////
-void cma::FollowGround::_addAttr_inMesh(void) {
+void wlib::FollowGround::_addAttr_inMesh(void) {
 	MStatus stat;
 	MFnTypedAttribute inMesh_attr;
 	inMesh = inMesh_attr.create("inMesh", "i", MFnData::kMesh, &stat);
@@ -32,7 +32,7 @@ void cma::FollowGround::_addAttr_inMesh(void) {
 ////////////////////////////////////////
 // _addAttr_inVector
 ////////////////////////////////////////
-void cma::FollowGround::_addAttr_rayVector(void){
+void wlib::FollowGround::_addAttr_rayVector(void){
 	MStatus stat;
 	MFnNumericAttribute rayVector_attr;
 	rayVector = rayVector_attr.createPoint("rayVector", "ray", &stat);
@@ -58,7 +58,7 @@ void cma::FollowGround::_addAttr_rayVector(void){
 ////////////////////////////////////////
 // _addAttr_outPoint
 ////////////////////////////////////////
-void cma::FollowGround::_addAttr_outPoint(void) {
+void wlib::FollowGround::_addAttr_outPoint(void) {
 	MStatus stat;
 	MFnNumericAttribute outPoint_attr;
 	outPoint = outPoint_attr.createPoint("outPoint", "point", &stat);
@@ -76,7 +76,7 @@ void cma::FollowGround::_addAttr_outPoint(void) {
 	MStatusException::throwIfError(stat, "rayVectorアトリビュートの追加に失敗しました", "FollowGround::_addAttr_outPoint");
 }
 
-void cma::FollowGround::_addAttr_rayPoint(void) {
+void wlib::FollowGround::_addAttr_rayPoint(void) {
 	MStatus stat;
 	MFnNumericAttribute rayPoint_attr;
 	rayPoint = rayPoint_attr.createPoint("rayPoint", "from", &stat);
@@ -98,7 +98,7 @@ void cma::FollowGround::_addAttr_rayPoint(void) {
 	MStatusException::throwIfError(stat, "rayPointアトリビュートにおいて、アトリビュート影響の登録に失敗しました", "FollowGround::_addAttr_rayPoint");
 }
 
-void cma::FollowGround::_addAttr_distance(void) {
+void wlib::FollowGround::_addAttr_distance(void) {
 
 	MStatus stat;
 	MFnNumericAttribute distance_attr, maxDistance_attr;

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////
-//wlibCarCameraRig.hpp
+//wlibTools.hpp
 //
 //Copyright (c) 2017 Shotaro Shirao
 /////////////////////////////////////////////////////
@@ -10,8 +10,8 @@
 
 
 #pragma once
-#ifndef wlib_WLIBCARCAMERARIG_HPP_
-#define wlib_WLIBCARCAMERARIG_HPP_
+#ifndef wlib_WLIBTOOLS_HPP_
+#define wlib_WLIBTOOLS_HPP_
 
 #include <maya/MFnPlugin.h>
 #include <maya/MObject.h>
