@@ -73,7 +73,7 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 			MFnTransform transform(dag);
 
 			//ê‚ëŒç¿ïW
-			VectorF point = transform.getTranslation(MSpace::kPreTransform);
+			VectorF point = transform.rotatePivot(MSpace::kWorld);
 			MQuaternion rot;
 			transform.getRotation(rot);
 
@@ -111,7 +111,7 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 						MVector world_up = MGlobal::upAxis();
 						MQuaternion rotation(world_up, normal);
 
-						transform.setTranslation(hitpoint, MSpace::kObject);
+						transform.setRotatePivot(hitpoint, MSpace::kWorld, true);
 						transform.setRotation(rotation, MSpace::kWorld);
 
 						break;

@@ -112,6 +112,7 @@ public:
 	std::string toString(void) const;
 
 	operator MVector() const;
+	operator MPoint() const;
 
 	/**
 	 * ŠOÏ‚ğ‹‚ß‚é
@@ -233,6 +234,17 @@ inline Vector<T>::operator MVector() const{
 	ret.z = static_cast<double>(this->z);
 	return ret;
 }
+
+template<typename T>
+inline Vector<T>::operator MPoint() const
+{
+	MPoint ret;
+	ret.x = static_cast<double>(this->x);
+	ret.y = static_cast<double>(this->y);
+	ret.z = static_cast<double>(this->z);
+	return ret;
+}
+
 
 template<typename T>
 inline T Vector<T>::det(const Vector<T>& v1, const Vector<T>& v2, const Vector<T>& v3) {
