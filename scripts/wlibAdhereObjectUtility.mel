@@ -1,0 +1,54 @@
+///
+/// @fn wlibAdhereObjectUtility.mel
+/// 
+///
+
+proc wlibAdhereObjectUtility_doIt(string $vec_grp_, string $chkbox_, string $maxdis_){
+    global float $wlibAdhObj_x = 0, $wlibAdhObj_y = 1, $wlibAdhObj_z = 0;
+    global string $wlibAdhObj_space = "";
+    global float $wlibAdhObj_dis = 10000;
+    
+    $wlibAdhObj_x = `floatFieldGrp -q -v1 $vec_grp_`;
+    $wlibAdhObj_y = `floatFieldGrp -q -v2 $vec_grp_`;
+    $wlibAdhObj_z = `floatFieldGrp -q -v3 $vec_grp_`;
+    $wlibAdhObj_space = ((`checkBox -q -value $chkbox_`) == true ? "object" : "world");
+    $wlibAdhObj_dis = `floatField -q -v $maxdis_`;
+    
+    wlibAdhereObject($wlibAdhObj_x, $wlibAdhObj_y, $wlibAdhObj_z, $wlibAdhObj_space, $wlibAdhObj_dis);
+}
+
+global proc wlibAdhereObjectUtilityDialog(){
+    global float $wlibAdhObj_x = 0, $wlibAdhObj_y = 1, $wlibAdhObj_z = 0;
+    global string $wlibAdhObj_space = "";
+    global float $wlibAdhObj_dis = 10000;
+    string $window = `window -title "wlibAdhereObject Utility Dialog" -iconName "wlibAdhereObject" -widthHeight 350 100`;
+    columnLayout -adjustableColumn true;
+        rowLayout -numberOfColumns 2 -columnWidth2 80 75;
+            text -label "Ray Vector";
+            string $vec_grp = `floatFieldGrp -numberOfFields 3 -label "" -cw 1 0 -value1 $wlibAdhObj_x -value2 $wlibAdhObj_y -value3 $wlibAdhObj_z`;
+        setParent ..;
+        
+        rowLayout -numberOfColumns 2 -columnWidth2 80 75;
+            text -label "";
+            string $chkbox = `checkBox -label "Object Space" -value ($wlibAdhObj_space == "object")`;
+        setParent ..;
+        
+        rowLayout -numberOfColumns 2 -columnWidth2 80 75;
+            text -label "Max Distance";
+            string $maxdis = `floatField -minValue 0 -maxValue 10000 -value $wlibAdhObj_dis -precision 1 -step 10`;
+        setParent ..;
+                
+        button -label "Execute" -command ("wlibAdhereObjectUtility_doIt " + $vec_grp + " " + $chkbox + " " + $maxdis + ";deleteUI " + $window);
+    setParent ..;
+    showWindow $window;
+}
+
+global proc wlibAdhereObjectUtility(string $arg){
+    
+    global float $wlibAdhObj_x = 0, $wlibAdhObj_y = 1, $wlibAdhObj_z = 0;
+    global string $wlibAdhObj_space = "";
+    global float $wlibAdhObj_dis = 10000;
+  
+    if($wlibAdhObj_space == "" || $arg == "dialog") wlibAdhereObjectUtilityDialog();
+    else wlibAdhereObject($wlibAdhObj_x, $wlibAdhObj_y, $wlibAdhObj_z, $wlibAdhObj_space, $wlibAdhObj_dis);
+}
