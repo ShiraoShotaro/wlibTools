@@ -2,7 +2,6 @@
 #ifndef WLIB_ADHEREOBJECTCMD_HPP_
 #define WLIB_ADHEREOBJECTCMD_HPP_
 
-
 #include <vector>
 #include <maya/MPxCommand.h>
 #include <maya/MVector.h>
@@ -14,6 +13,7 @@
 
 namespace wlib {
 
+/// 平面に沿わせた物体の移動を行うコマンド
 class AdhereObjectCmd : public MPxCommand {
 public:
 

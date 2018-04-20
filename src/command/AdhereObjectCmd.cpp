@@ -52,10 +52,7 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 		MDagPath ground;
 		select.getDagPath(select.length() - 1, ground);
 		MFnTransform ground_transform(ground);
-
-		//MFnMesh ground_mesh(ground, &ret);
-		//MStatusException::throwIfError(ret, "ポリゴンフェースの取得に失敗", "wlib::FollowGround::_getLengthToCrossPoint");
-
+		
 		MDagPath dag;
 		MPointArray points;
 		MIntArray vertexes;
@@ -85,10 +82,7 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 				ray_vector.y = ray_quat.y;
 				ray_vector.z = ray_quat.z;
 			}
-			std::cerr << "====================" << std::endl;
-			std::cerr << "POINT:" << point.toString() << std::endl;
-			std::cerr << "RAY:" << ray_vector.x << "," << ray_vector.y << "," << ray_vector.z << std::endl;
-
+			
 			bool is_cross_current = false;
 			for (; !face_iter.isDone() && !is_cross_current; face_iter.next()) {
 				//三角面の数を取得 
@@ -125,14 +119,16 @@ MStatus wlib::AdhereObjectCmd::doIt(const MArgList & args)
 
 MStatus wlib::AdhereObjectCmd::undoIt(void)
 {
-	for (auto p = this->histories_.begin(); p != this->histories_.end(); ++p) p->undoIt();
-	return MStatus();
+	MStatus ret;
+	for (auto p = this->histories_.begin(); p != this->histories_.end() && ret == MStatus::kSuccess; ++p) ret = p->undoIt();
+	return ret;
 }
 
 MStatus wlib::AdhereObjectCmd::redoIt(void)
 {
-	for (auto p = this->histories_.begin(); p != this->histories_.end(); ++p) p->doIt();
-	return MStatus();
+	MStatus ret;
+	for (auto p = this->histories_.begin(); p != this->histories_.end() && ret == MStatus::kSuccess; ++p) ret = p->doIt();
+	return ret;
 }
 
 bool wlib::AdhereObjectCmd::isUndoable(void) const
@@ -152,10 +148,6 @@ double wlib::AdhereObjectCmd::_checkHitPolygon(const MVector & abs_position, con
 	points.append(_points[0] + abs_position);
 	points.append(_points[1] + abs_position);
 	points.append(_points[2] + abs_position);
-
-	std::cerr << "TRIANGLE[0]:" << points[0].x << "," << points[0].y << "," << points[0].z << std::endl;
-	std::cerr << "TRIANGLE[1]:" << points[1].x << "," << points[1].y << "," << points[1].z << std::endl;
-	std::cerr << "TRIANGLE[2]:" << points[2].x << "," << points[2].y << "," << points[2].z << std::endl;
 
 	VectorD edge1(points[1] - points[0]);
 	VectorD edge2(points[2] - points[0]);
