@@ -115,8 +115,8 @@ void removeNodes(MFnPlugin & plugin) {
  */
 MStatus wlib::initializePlugin(MObject _obj) {
 	MFnPlugin plugin(_obj, "Autodesk", "2015 update2");
-	std::cerr << "White Library - Car Camera Rig Plug-in" << std::endl;
-	std::cerr << "version 0.1" << std::endl;
+	std::cerr << "White Library - Tools & Utilities" << std::endl;
+	std::cerr << "version 1.0" << std::endl;
 	MStatus stat = MStatus::kSuccess;
 	try {
 		addCommands(plugin);
@@ -146,8 +146,7 @@ MStatus wlib::initializePlugin(MObject _obj) {
 
 	if (stat == MStatus::kSuccess) {
 		//読み込み完了
-		std::cerr << "Finished to load CarMotionAnimator plug-in." << std::endl;
-		std::cerr << "(c) 2017 S.Shirao" << std::endl;
+		std::cerr << "Finished to load wlibTools plug-in." << std::endl;
 #ifdef _DEBUG
 		//デバッグ時のみ標準出力をエラー出力へ切り替え
 		std::cout.rdbuf(std::cerr.rdbuf());
